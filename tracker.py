@@ -49,15 +49,20 @@ def main():
     outdir = Path(a.config).parent
     (outdir / "forecast.json").write_text(json.dumps({"summary": summary, "rows": rows}, indent=2))
     lines = [f"# Forecast ({cfg['hours_per_week']}h/week, {cfg['days_per_week']} days, {cfg.get('off_day','sunday')} off)", "", f"Finish: {summary['finish_date']} ({summary['weeks']} weeks, {summary['total_remaining']}h remaining, {summary['daily_hours']}h/day)", ""]
-    prof = [r for r in rows if r["id"] in ("13", "M5")]
-    if prof:
-        lines.append(f"Proficient (through 13+M5): {prof[-1]['due_date']}")
+    prof_row = next((r for r in rows if r["id"] == "13"), None)
+    if prof_row is not None:
+        prof_label = "Proficient (through 13+M5)"
+    else:
+        prof_row = next((r for r in rows if r["id"] == "M5"), None)
+        prof_label = "Proficient (13 done)"
+    if prof_row is not None:
+        lines.append(f"{prof_label}: {prof_row['due_date']}")
         lines.append("")
     for r in rows:
         mark = "x" if r["id"] in completed else " "
         lines.append(f"- [{mark}] {r['id']} {r['title']} — {r['hours']}h due {r['due_date']}")
     (outdir / "forecast.md").write_text("\n".join(lines))
-    print(f"proficient: {prof[-1]['due_date'] if prof else '?'} finish: {summary['finish_date']} ({summary['daily_hours']}h/day)")
+    print(f"proficient: {prof_row['due_date'] if prof_row is not None else '?'} finish: {summary['finish_date']} ({summary['daily_hours']}h/day)")
 
 if __name__ == "__main__":
     main()
