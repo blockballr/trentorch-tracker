@@ -1,0 +1,30 @@
+upstream_commit: 6ca2238
+buffer_pct: 20
+modules:
+  - {id: "01", title: "Tensor Foundation", hours: 18, kind: module}
+  - {id: "02", title: "Activations", hours: 12, kind: module}
+  - {id: "03", title: "Layers", hours: 12, kind: module}
+  - {id: "04", title: "Losses", hours: 12, kind: module}
+  - {id: "05", title: "DataLoader", hours: 18, kind: module}
+  - {id: "06", title: "Autograd", hours: 34, kind: module}
+  - {id: "07", title: "Optimizers", hours: 18, kind: module}
+  - {id: "08", title: "Training", hours: 18, kind: module}
+  - {id: "09", title: "Convolutions", hours: 26, kind: module}
+  - {id: "10", title: "Tokenization", hours: 18, kind: module}
+  - {id: "11", title: "Embeddings", hours: 18, kind: module}
+  - {id: "12", title: "Attention", hours: 12, kind: module}
+  - {id: "13", title: "Transformers", hours: 18, kind: module}
+  - {id: "14", title: "Profiling", hours: 26, kind: module}
+  - {id: "15", title: "Quantization", hours: 26, kind: module}
+  - {id: "16", title: "Compression", hours: 18, kind: module}
+  - {id: "17", title: "Acceleration", hours: 12, kind: module}
+  - {id: "18", title: "Memoization", hours: 18, kind: module}
+  - {id: "19", title: "Benchmarking", hours: 34, kind: module}
+  - {id: "20", title: "Capstone", hours: 18, kind: module}
+milestones:
+  - {id: "M1", title: "1958 Perceptron", hours: 6, kind: milestone}
+  - {id: "M2", title: "1969 XOR", hours: 6, kind: milestone}
+  - {id: "M3", title: "1986 MLP", hours: 6, kind: milestone}
+  - {id: "M4", title: "1998 CNN", hours: 6, kind: milestone}
+  - {id: "M5", title: "2017 Transformer", hours: 6, kind: milestone}
+  - {id: "M6", title: "2018 MLPerf", hours: 6, kind: milestone}
