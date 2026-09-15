@@ -7,3 +7,4 @@ python tracker.py --update --config private/my.yaml
 # ~6.67h/day, proficient 2026-11-03 (through Module 13 Transformers), finish 2026-12-11
 ## Anyone else (10h/week, 5 days)
 # copy private/my.yaml, set hours_per_week: 10, days_per_week: 5, trentorch_path: <their clone>
+# ~50 weeks (~12 months), ~2h/day

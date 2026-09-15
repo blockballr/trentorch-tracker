@@ -26,9 +26,9 @@ def compute_forecast(items, completed, hours_per_week, days_per_week, off_day, s
         raise ValueError("days_per_week must be 5, 6, or 7")
     mult = 1.0 + float(buffer_pct) / 100.0
     daily = float(hours_per_week) / float(days_per_week)
-    off = OFF[off_day.lower()]
+    off = OFF[off_day.lower()] if days_per_week != 7 else None
     cur = datetime.date.fromisoformat(start_date)
-    if cur.weekday() == off:
+    if off is not None and cur.weekday() == off:
         cur += datetime.timedelta(days=1)
         while cur.weekday() == off:
             cur += datetime.timedelta(days=1)
@@ -43,7 +43,10 @@ def compute_forecast(items, completed, hours_per_week, days_per_week, off_day, s
         carry += h
         while carry >= daily - 1e-9:
             carry -= daily
-            cur = _advance(cur, off)
+            if off is None:
+                cur += datetime.timedelta(days=1)
+            else:
+                cur = _advance(cur, off)
         rows.append({"id": it["id"], "title": it["title"], "hours": round(h, 1), "due_date": cur.isoformat(), "daily_target": round(daily, 2)})
     weeks = remaining / float(hours_per_week)
     return rows, {"total_remaining": round(remaining, 1), "weeks": round(weeks, 2), "finish_date": cur.isoformat(), "daily_hours": round(daily, 2)}

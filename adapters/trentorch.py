@@ -7,15 +7,11 @@ def read_progress(clone):
     p = Path(clone) / "user_data" / "progress.json"
     if not p.exists():
         return set(), set()
+    raw = p.read_text()
     try:
-        d = json.loads(p.read_text())
+        d = json.loads(raw)
     except Exception:
-        bak = p.with_suffix(".json.bak")
-        try:
-            bak.write_text(p.read_text())
-        except Exception:
-            pass
-        raise ValueError(f"corrupt progress.json backed up to {bak}")
+        raise ValueError(f"corrupt progress.json at {p}: {raw[:80]}")
     return set(d.get("completed_modules", [])), set(d.get("started_modules", []))
 
 
@@ -32,7 +28,7 @@ def read_modules(clone):
             try:
                 text = y.read_text()
                 for line in text.splitlines():
-                    if line.startswith("title:"):
+                    if line.strip().startswith("title:"):
                         title = line.split(":", 1)[1].strip()
                         break
             except Exception:
@@ -44,6 +40,8 @@ def read_modules(clone):
 def read_upstream_commit(clone):
     try:
         r = subprocess.run(["git", "-C", clone, "rev-parse", "--short", "HEAD"], capture_output=True, text=True, timeout=10)
+        if r.returncode != 0:
+            return "unknown"
         return r.stdout.strip()
     except Exception:
         return "unknown"

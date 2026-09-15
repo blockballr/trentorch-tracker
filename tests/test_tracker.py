@@ -1,51 +1,109 @@
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+REAL_CLONE = Path("C:/Users/user/TrenTorch")
+
+
+def make_synthetic_clone(base: Path) -> str:
+    (base / "user_data").mkdir(parents=True, exist_ok=True)
+    (base / "user_data" / "progress.json").write_text(
+        json.dumps({"started_modules": ["01"], "completed_modules": []})
+    )
+    src = base / "data" / "src"
+    src.mkdir(parents=True, exist_ok=True)
+    for i in range(1, 21):
+        mod_id = f"{i:02d}"
+        d = src / f"{mod_id}_mod"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "module.yaml").write_text(f"title: Module {mod_id}\n")
+    return str(base)
+
+
+def write_cfg(tmp_path: Path, clone: str) -> Path:
+    cfg = tmp_path / "my.yaml"
+    posix = Path(clone).as_posix()
+    cfg.write_text(
+        'hours_per_week: 40\ndays_per_week: 6\noff_day: sunday\n'
+        f'start_date: "2026-09-15"\nbuffer_pct: 20\ntrentorch_path: "{posix}"\n'
+    )
+    return cfg
+
+
 def test_math_6day():
-    import sys; sys.path.insert(0, "C:/Users/user/trentorch-tracker")
     from core import compute_forecast
     items = [{"id": "01", "title": "T", "hours": 18, "kind": "module"}]
     rows, summary = compute_forecast(items, set(), 40, 6, "sunday", "2026-09-15", 0)
     assert abs(summary["daily_hours"] - 6.6667) < 0.01
     assert summary["weeks"] == 18 / 40
-def test_adapter_real_clone():
-    import sys; sys.path.insert(0, "C:/Users/user/trentorch-tracker")
+
+
+def test_adapter_synthetic_exact(tmp_path):
     from adapters.trentorch import read_progress, read_modules
-    completed, started = read_progress("C:/Users/user/TrenTorch")
-    assert "01" in started or len(completed) >= 0
-    mods = read_modules("C:/Users/user/TrenTorch")
+    clone = make_synthetic_clone(tmp_path / "clone")
+    completed, started = read_progress(clone)
+    assert started == {"01"} and completed == set()
+    mods = read_modules(clone)
+    assert len(mods) == 20 and mods[0] == {"id": "01", "title": "Module 01"}
+
+
+@pytest.mark.skipif(not REAL_CLONE.exists(), reason="real clone not present")
+def test_adapter_real_clone():
+    from adapters.trentorch import read_modules
+    mods = read_modules(str(REAL_CLONE))
     assert len(mods) == 20
-    assert mods[0]["id"] == "01"
+    assert {m["id"] for m in mods} == {f"{i:02d}" for i in range(1, 21)}
+
+
 def test_cli_update(tmp_path):
-    import sys, json; sys.path.insert(0, "C:/Users/user/trentorch-tracker")
-    from pathlib import Path
-    cfg = tmp_path / "my.yaml"
-    cfg.write_text('hours_per_week: 40\ndays_per_week: 6\noff_day: sunday\nstart_date: "2026-09-15"\nbuffer_pct: 20\ntrentorch_path: "C:/Users/user/TrenTorch"\n')
-    import subprocess
-    r = subprocess.run(["python", "C:/Users/user/trentorch-tracker/tracker.py", "--update", "--config", str(cfg)], capture_output=True, text=True, timeout=30)
+    clone = make_synthetic_clone(tmp_path / "clone")
+    cfg = write_cfg(tmp_path, clone)
+    r = subprocess.run(
+        [sys.executable, str(ROOT / "tracker.py"), "--update", "--config", str(cfg)],
+        capture_output=True, text=True, timeout=30,
+    )
     assert r.returncode == 0, r.stderr
     assert (tmp_path / "forecast.json").exists()
     d = json.loads((tmp_path / "forecast.json").read_text())
     assert d["summary"]["daily_hours"] == 6.67
+
+
 def test_idempotent(tmp_path):
-    import subprocess
-    cfg = tmp_path / "my.yaml"
-    cfg.write_text('hours_per_week: 40\ndays_per_week: 6\noff_day: sunday\nstart_date: "2026-09-15"\nbuffer_pct: 20\ntrentorch_path: "C:/Users/user/TrenTorch"\n')
-    r1 = subprocess.run(["python", "C:/Users/user/trentorch-tracker/tracker.py", "--update", "--config", str(cfg)], capture_output=True, text=True, timeout=30)
+    clone = make_synthetic_clone(tmp_path / "clone")
+    cfg = write_cfg(tmp_path, clone)
+    cmd = [sys.executable, str(ROOT / "tracker.py"), "--update", "--config", str(cfg)]
+    r1 = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
     assert r1.returncode == 0, r1.stderr
     a = (tmp_path / "forecast.json").read_text()
-    r2 = subprocess.run(["python", "C:/Users/user/trentorch-tracker/tracker.py", "--update", "--config", str(cfg)], capture_output=True, text=True, timeout=30)
+    r2 = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
     assert r2.returncode == 0, r2.stderr
     assert (tmp_path / "forecast.json").read_text() == a
+
+
 def test_missing_progress(tmp_path):
-    import sys; sys.path.insert(0, "C:/Users/user/trentorch-tracker")
     from adapters.trentorch import read_progress
     c, s = read_progress(str(tmp_path))
     assert c == set() and s == set()
+
+
 def test_proficient_before_finish(tmp_path):
-    import datetime, json, re, subprocess
-    cfg = tmp_path / "my.yaml"
-    cfg.write_text('hours_per_week: 40\ndays_per_week: 6\noff_day: sunday\nstart_date: "2026-09-15"\nbuffer_pct: 20\ntrentorch_path: "C:/Users/user/TrenTorch"\n')
-    r = subprocess.run(["python", "C:/Users/user/trentorch-tracker/tracker.py", "--update", "--config", str(cfg)], capture_output=True, text=True, timeout=30)
+    import datetime
+    clone = make_synthetic_clone(tmp_path / "clone")
+    cfg = write_cfg(tmp_path, clone)
+    r = subprocess.run(
+        [sys.executable, str(ROOT / "tracker.py"), "--update", "--config", str(cfg)],
+        capture_output=True, text=True, timeout=30,
+    )
     assert r.returncode == 0, r.stderr
-    m = re.search(r"proficient: (\d{4}-\d{2}-\d{2})", r.stdout)
+    m = re.search(r"Module 13 .*?: (\d{4}-\d{2}-\d{2})", r.stdout)
     assert m, r.stdout
     prof_date = datetime.date.fromisoformat(m.group(1))
     d = json.loads((tmp_path / "forecast.json").read_text())
