@@ -133,15 +133,19 @@ def main(argv=None):
             )
         else:
             print(f"auto-adjust: ratio {adjust_info['ratio']:.2f} within 10%, estimates unchanged")
-    rows, summary = compute_forecast(
-        items,
-        completed,
-        float(cfg["hours_per_week"]),
-        int(cfg["days_per_week"]),
-        cfg.get("off_day", "sunday"),
-        cfg.get("start_date", "2026-09-15"),
-        float(cfg.get("buffer_pct", 20)),
-    )
+    try:
+        rows, summary = compute_forecast(
+            items,
+            completed,
+            float(cfg["hours_per_week"]),
+            int(cfg["days_per_week"]),
+            cfg.get("off_day", "sunday"),
+            cfg.get("start_date", "2026-09-15"),
+            float(cfg.get("buffer_pct", 20)),
+        )
+    except (ValueError, KeyError, TypeError) as e:
+        print(f"error: invalid config: {e}", file=sys.stderr)
+        return 2
     outdir = Path(a.config).parent
     payload = {
         "summary": summary,

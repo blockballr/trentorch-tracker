@@ -112,3 +112,39 @@ def test_proficient_before_finish(tmp_path):
     assert m.group(1) == row13["due_date"]
     fin = datetime.date.fromisoformat(d["summary"]["finish_date"])
     assert (fin - prof_date).days >= 14
+
+
+def test_weeks_invariant_across_days():
+    from core import compute_forecast
+    items = [{"id": "01", "title": "T", "hours": 40, "kind": "module"}]
+    _, s5 = compute_forecast(items, set(), 40, 5, "sunday", "2026-09-15", 20)
+    _, s6 = compute_forecast(items, set(), 40, 6, "sunday", "2026-09-15", 20)
+    _, s7 = compute_forecast(items, set(), 40, 7, "sunday", "2026-09-15", 20)
+    assert s5["weeks"] == s6["weeks"] == s7["weeks"]
+    assert abs(s5["daily_hours"] - 8.0) < 0.01
+    assert abs(s7["daily_hours"] - 40 / 7) < 0.01
+
+
+def test_cli_invalid_days_exit_2(tmp_path):
+    clone = make_synthetic_clone(tmp_path / "clone")
+    cfg = tmp_path / "bad.yaml"
+    cfg.write_text(
+        "hours_per_week: 40\ndays_per_week: 4\n"
+        f'start_date: "2026-09-15"\ntrentorch_path: "{Path(clone).as_posix()}"\n'
+    )
+    r = subprocess.run(
+        [sys.executable, str(ROOT / "tracker.py"), "--update", "--config", str(cfg)],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert r.returncode == 2
+    assert "days_per_week" in (r.stderr + r.stdout).lower()
+
+
+def test_cli_missing_path_exit_2(tmp_path):
+    cfg = tmp_path / "nop.yaml"
+    cfg.write_text('hours_per_week: 40\ndays_per_week: 6\nstart_date: "2026-09-15"\n')
+    r = subprocess.run(
+        [sys.executable, str(ROOT / "tracker.py"), "--update", "--config", str(cfg)],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert r.returncode == 2
