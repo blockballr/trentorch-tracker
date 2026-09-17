@@ -106,6 +106,7 @@ python tr.py weekly
 python tr.py heatmap
 python tr.py heatmap --html
 python tr.py heatmap --html path\to\out.html --weeks 12
+python tr.py heatmap --html out.html --portfolio --page-label 03
 python tr.py watch
 python tr.py watch --test
 ```
@@ -117,6 +118,8 @@ Regular time fills up to the daily target. Time beyond that is overtime. The tar
 Notifications: terminal bell and message always. Optional toast via BurntToast on Windows or notify-send on Linux when those are installed. Missing toast tools are ignored.
 
 `heatmap --html` writes a self-contained dark HTML grid next to the config (`heatmap.html`) or at the path you pass. Open it in a browser for screenshots. Omit `--html` for the terminal heatmap.
+
+`--portfolio` uses the Critical Flytech slide spacing: 575x744 canvas, 36px side padding, 32px top pad, 34px title-to-stage gap, 500px stage, 72px stage-to-footer gap, 28px bottom pad. Serif title top-left; footer page label left, INDUSTRY and ROLE right.
 
 ### Demo data without touching your real log
 
