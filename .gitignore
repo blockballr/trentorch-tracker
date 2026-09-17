@@ -1,4 +1,4 @@
-private/
+private/*
 !private/my.example.yaml
 __pycache__/
 .pytest_cache/
