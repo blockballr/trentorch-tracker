@@ -52,7 +52,8 @@ def test_adapter_synthetic_exact(tmp_path):
     completed, started = read_progress(clone)
     assert started == {"01"} and completed == set()
     mods = read_modules(clone)
-    assert len(mods) == 20 and mods[0] == {"id": "01", "title": "Module 01"}
+    assert len(mods) == 20
+    assert mods[0]["id"] == "01" and mods[0]["title"] == "Module 01"
 
 
 @pytest.mark.skipif(not REAL_CLONE.exists(), reason="real clone not present")

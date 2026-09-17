@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import notify
 import sessions
 from report import build_report, format_report
+from weekly import format_heatmap, format_weekly, weekly_summary
 
 
 def _default_config():
@@ -49,6 +50,8 @@ def main(argv=None):
     sub.add_parser("stop")
     sub.add_parser("status")
     sub.add_parser("report")
+    sub.add_parser("weekly")
+    sub.add_parser("heatmap")
 
     p_watch = sub.add_parser("watch")
     p_watch.add_argument("--test", action="store_true")
@@ -79,9 +82,7 @@ def main(argv=None):
             )
             fired = notify.fire_if_needed(sessions.maybe_alert(cfg))
             if not fired and rec.get("target_hit"):
-                print(
-                    "Daily target hit! Overtime is being tracked."
-                )
+                print("Daily target hit! Overtime is being tracked.")
             return 0
         if a.cmd == "status":
             st = sessions.status(cfg)
@@ -90,6 +91,12 @@ def main(argv=None):
             return 0
         if a.cmd == "report":
             print(format_report(build_report(cfg)))
+            return 0
+        if a.cmd == "weekly":
+            print(format_weekly(weekly_summary(cfg)))
+            return 0
+        if a.cmd == "heatmap":
+            print(format_heatmap(cfg))
             return 0
         if a.cmd == "watch":
             if a.test:
