@@ -166,7 +166,7 @@ def build_heatmap_html(config_path, now=None, weeks=12, title="TrenTorch study h
                 hits += 1
             lv = _heat_level(m, target)
             cells.append(
-                f'<td class="c lv{lv}" title="{day.isoformat()} · {m:.0f}m"></td>'
+                f'<td class="c lv{lv}" title="{day.isoformat()} | {m:.0f}m"></td>'
             )
         label = week[0].isoformat()[5:] if week[0] else ""
         rows_html.append(
@@ -209,11 +209,11 @@ def build_heatmap_html(config_path, now=None, weeks=12, title="TrenTorch study h
 <body>
   <div class="card">
     <h1>{title}</h1>
-    <div class="sub">target {format_hm(target)}/day · {weeks} weeks</div>
+    <div class="sub">target {format_hm(target)}/day | {weeks} weeks</div>
     <table>{"".join(rows_html)}</table>
     <div class="legend">Less {swatches} More</div>
     <div class="stats">
-      <b>{days_logged}</b> study days · <b>{hits}</b> target days ·
+      <b>{days_logged}</b> study days | <b>{hits}</b> target days |
       <b>{total/60:.1f}h</b> logged
     </div>
   </div>
