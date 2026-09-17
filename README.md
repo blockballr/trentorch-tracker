@@ -49,6 +49,8 @@ python tr.py status
 python tr.py report
 python tr.py weekly
 python tr.py heatmap
+python tr.py heatmap --html
+python tr.py heatmap --html path\to\out.html --weeks 12
 python tr.py watch
 python tr.py watch --test
 ```
@@ -58,6 +60,8 @@ Regular time fills up to the target; the rest is overtime. Alert fires once per 
 Timer state and sessions live under `private/` and are never committed.
 
 Notifications: terminal bell + message always. Optional toast via BurntToast (Windows) or notify-send (Linux) when available; missing modules are ignored.
+
+`heatmap --html` writes a self-contained dark HTML grid next to the config (`heatmap.html`) or to the path you pass. Open it in a browser for screenshots. Terminal heatmap stays the default when `--html` is omitted.
 
 ## Config template
 `private/my.example.yaml` is tracked. Copy it to `private/my.yaml` (gitignored) and point `trentorch_path` at your clone.

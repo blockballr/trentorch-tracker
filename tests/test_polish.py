@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
 
 import sessions
 from adapters.trentorch import read_milestones, read_progress
-from weekly import format_heatmap, format_weekly, weekly_summary
+from weekly import format_heatmap, format_weekly, weekly_summary, write_heatmap_html
 
 
 @pytest.fixture
@@ -121,3 +121,24 @@ def test_cli_weekly_heatmap(cfg):
     r2 = subprocess.run([py, str(tr), "--config", str(cfg), "heatmap"], capture_output=True, text=True, timeout=30)
     assert r2.returncode == 0, r2.stderr
     assert "heatmap" in r2.stdout.lower()
+
+
+def test_heatmap_html_feature(cfg, tmp_path):
+    t0 = datetime.datetime.fromisoformat("2026-10-15T08:00:00")
+    sessions.start(cfg, module="01", now=t0)
+    sessions.stop(cfg, now=t0 + datetime.timedelta(minutes=420))
+    out = tmp_path / "hm.html"
+    path = write_heatmap_html(cfg, out_path=out, now=t0, weeks=4)
+    assert path.exists()
+    html = path.read_text(encoding="utf-8")
+    assert "TrenTorch study heatmap" in html
+    assert "study days" in html
+    r = subprocess.run(
+        [sys.executable, str(ROOT / "tr.py"), "--config", str(cfg), "heatmap", "--html", "--weeks", "4"],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert r.returncode == 0, r.stderr
+    assert "wrote" in r.stdout
+    default_out = cfg.parent / "heatmap.html"
+    assert default_out.exists()
+    assert "lv" in default_out.read_text(encoding="utf-8")

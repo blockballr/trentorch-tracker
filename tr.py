@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import notify
 import sessions
 from report import build_report, format_report
-from weekly import format_heatmap, format_weekly, weekly_summary
+from weekly import format_heatmap, format_weekly, weekly_summary, write_heatmap_html
 
 
 def _default_config():
@@ -51,7 +51,10 @@ def main(argv=None):
     sub.add_parser("status")
     sub.add_parser("report")
     sub.add_parser("weekly")
-    sub.add_parser("heatmap")
+    p_heat = sub.add_parser("heatmap")
+    p_heat.add_argument("--html", nargs="?", const="AUTO", default=None,
+                        help="write HTML heatmap; optional output path")
+    p_heat.add_argument("--weeks", type=int, default=8)
 
     p_watch = sub.add_parser("watch")
     p_watch.add_argument("--test", action="store_true")
@@ -96,6 +99,12 @@ def main(argv=None):
             print(format_weekly(weekly_summary(cfg)))
             return 0
         if a.cmd == "heatmap":
+            if a.html is not None:
+                out = None if a.html == "AUTO" else a.html
+                path = write_heatmap_html(cfg, out_path=out, weeks=max(1, int(a.weeks)))
+                print(f"wrote {path}")
+                print(format_heatmap(cfg))
+                return 0
             print(format_heatmap(cfg))
             return 0
         if a.cmd == "watch":
