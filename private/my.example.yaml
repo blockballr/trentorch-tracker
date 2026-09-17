@@ -4,3 +4,4 @@ off_day: sunday
 start_date: "2026-09-15"
 buffer_pct: 20
 trentorch_path: "C:/Users/user/TrenTorch"
+auto_adjust: false

@@ -4,6 +4,7 @@ Personal roadmap tracker for TrenTorch. Standalone, read-only adapter.
 ## Forecast
 ```
 python tracker.py --update --config private/my.yaml
+python tracker.py --update --config private/my.yaml --auto-adjust
 ```
 
 ### Your pace (40h/week, 6 days, Sun off)
@@ -19,6 +20,14 @@ python tracker.py --update --config private/my.yaml
 python tracker.py --update --config private/my.yaml
 ```
 - ~50 weeks (~12 months), ~2h/day
+
+### Estimate auto-adjust
+Observed ratio = actual logged hours / unbuttered estimate hours, on modules that have session time only.
+When that ratio is more than 10% off 1.0 and auto-adjust is on, remaining module hours are scaled by the ratio before forecast dates are computed.
+
+- Report always prints the observed ratio diagnosis.
+- Forecast dates stay on base estimates unless you set `auto_adjust: true` in config or pass `--auto-adjust`.
+- Completed modules are never re-scaled; only remaining work is.
 
 ## Study timer
 Short command entrypoint is `python tr.py`. Config defaults to `private/my.yaml`.
@@ -38,7 +47,7 @@ Daily target = `(hours_per_week / days_per_week) * 60` minutes (40/6 → 400).
 Regular time fills up to the target; the rest is overtime. Alert fires once per day.
 Timer state and sessions live under `private/` and are never committed.
 
-Notifications use the terminal bell plus a message. Toast delivery and estimate auto-adjust are later work.
+Notifications use the terminal bell plus a message. Toast delivery is later work.
 
 ## Tests
 ```

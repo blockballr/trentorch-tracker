@@ -35,6 +35,8 @@ def test_report_empty_full_curriculum(cfg):
     assert "Est. Hours" in text
     assert "not started" in text
     assert "Accuracy:" in text
+    assert "Observed ratio:" in text
+    assert "within 10%" in text
 
 
 def test_report_actuals_vs_estimates(cfg):
@@ -47,5 +49,8 @@ def test_report_actuals_vs_estimates(cfg):
     assert abs(row["total"] - 12.4) < 0.05
     assert row["vs"] != "not started"
     assert report["summary"]["days_logged"] == 1
+    assert "adjust" in report
+    assert report["adjust"]["ratio"] > 0
     text = format_report(report)
     assert "01" in text and "Accuracy:" in text
+    assert "Observed ratio:" in text
