@@ -55,9 +55,6 @@ def main(argv=None):
     p_heat.add_argument("--html", nargs="?", const="AUTO", default=None,
                         help="write HTML heatmap; optional output path")
     p_heat.add_argument("--weeks", type=int, default=8)
-    p_heat.add_argument("--portfolio", action="store_true",
-                        help="Critical Flytech slide layout (575x744)")
-    p_heat.add_argument("--page-label", default="01")
     p_heat.add_argument("--title", default=None)
 
     p_watch = sub.add_parser("watch")
@@ -109,8 +106,6 @@ def main(argv=None):
                     cfg,
                     out_path=out,
                     weeks=max(1, int(a.weeks)),
-                    portfolio=bool(a.portfolio),
-                    page_label=a.page_label,
                     title=a.title,
                 )
                 print(f"wrote {path}")

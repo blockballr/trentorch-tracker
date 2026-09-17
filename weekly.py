@@ -187,10 +187,6 @@ def build_heatmap_html(
     now=None,
     weeks=12,
     title="TrenTorch study heatmap",
-    portfolio=False,
-    page_label="01",
-    industry="EDUCATION SOFTWARE",
-    role="PRODUCT | CLI | DATA VIZ",
 ):
     data = _heatmap_grid_data(config_path, now, weeks)
     target = data["target"]
@@ -199,102 +195,6 @@ def build_heatmap_html(
     swatches = "".join(
         f'<span class="sw" style="background:{c}"></span>' for c in palette
     )
-    if portfolio:
-        # Spacing locked to the Critical Flytech slide reference:
-        # canvas 575x744, pad-x 36, pad-top 32, title-to-stage 34,
-        # stage 500px tall, stage-to-footer ~72, footer pad-bottom 28.
-        return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>{title}</title>
-<style>
-  * {{ box-sizing: border-box; }}
-  html, body {{ margin:0; padding:0; background:#e8e7e4; }}
-  body {{ min-height:100vh; display:flex; align-items:center; justify-content:center;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }}
-  .slide {{
-    width:575px; height:744px; background:#f1f0ee; color:#141414;
-    padding:32px 36px 28px; display:flex; flex-direction:column;
-  }}
-  .title {{
-    font-family: "Times New Roman", Times, Georgia, serif;
-    font-size:23px; font-weight:400; line-height:1.15; letter-spacing:0.01em;
-    margin:0 0 34px 0;
-  }}
-  .stage {{
-    height:500px; background:#c2c2c0; width:100%;
-    display:flex; align-items:center; justify-content:center;
-    padding:28px 24px;
-  }}
-  .heat-card {{
-    width:100%; max-width:420px; color:#e6edf3;
-  }}
-  .heat-card h2 {{
-    margin:0 0 10px; font-size:13px; font-weight:600; color:#0d1117;
-    letter-spacing:0.02em;
-  }}
-  .heat-wrap {{
-    background:#0d1117; border-radius:10px; padding:16px 14px 12px;
-  }}
-  table {{ border-collapse:separate; border-spacing:3px; margin:0 auto; }}
-  th.wk {{
-    color:#8b949e; font-weight:500; font-size:9px; text-align:right;
-    padding-right:5px; width:34px; font-family: inherit;
-  }}
-  td.c {{ width:13px; height:13px; border-radius:2px; }}
-  td.empty {{ background:transparent; }}
-  .lv0 {{ background:#161b22; border:1px solid #30363d; }}
-  .lv1 {{ background:{palette[1]}; }}
-  .lv2 {{ background:{palette[2]}; }}
-  .lv3 {{ background:{palette[3]}; }}
-  .lv4 {{ background:{palette[4]}; }}
-  .lv5 {{ background:{palette[5]}; }}
-  .legend {{
-    margin-top:12px; display:flex; align-items:center; gap:5px;
-    color:#8b949e; font-size:10px; justify-content:center;
-  }}
-  .sw {{ width:10px; height:10px; border-radius:2px; display:inline-block; }}
-  .stage-note {{
-    margin-top:10px; text-align:center; color:#3a3a38; font-size:10px;
-    letter-spacing:0.04em; text-transform:uppercase;
-  }}
-  .footer {{
-    margin-top:72px; display:flex; align-items:flex-end; justify-content:space-between;
-    gap:24px; font-size:11px; line-height:1.45; letter-spacing:0.03em;
-  }}
-  .page {{ font-weight:400; color:#141414; }}
-  .meta {{ text-align:right; text-transform:uppercase; color:#141414; }}
-  .meta .k {{ font-weight:700; }}
-  .meta div + div {{ margin-top:2px; }}
-</style>
-</head>
-<body>
-  <div class="slide">
-    <div class="title">{title}</div>
-    <div class="stage">
-      <div class="heat-card">
-        <div class="heat-wrap">
-          <table>{rows}</table>
-          <div class="legend">Less {swatches} More</div>
-        </div>
-        <div class="stage-note">
-          target {format_hm(target)}/day | {data['days_logged']} study days |
-          {data['hits']} target days | {data['total']/60:.1f}h logged
-        </div>
-      </div>
-    </div>
-    <div class="footer">
-      <div class="page">&bull; {page_label}</div>
-      <div class="meta">
-        <div><span class="k">INDUSTRY</span> {industry}</div>
-        <div><span class="k">ROLE</span> {role}</div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-"""
     bg, card, text, muted, border = "#0d1117", "#161b22", "#e6edf3", "#8b949e", "#30363d"
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -349,10 +249,6 @@ def write_heatmap_html(
     now=None,
     weeks=12,
     title=None,
-    portfolio=False,
-    page_label="01",
-    industry="EDUCATION SOFTWARE",
-    role="PRODUCT | CLI | DATA VIZ",
 ):
     cfg_path = Path(config_path)
     if out_path is None:
@@ -360,20 +256,12 @@ def write_heatmap_html(
     else:
         out_path = Path(out_path)
     if title is None:
-        title = (
-            "TrenTorch Tracker"
-            if portfolio
-            else f"TrenTorch study heatmap ({cfg_path.parent.name})"
-        )
+        title = f"TrenTorch study heatmap ({cfg_path.parent.name})"
     html = build_heatmap_html(
         cfg_path,
         now=now,
         weeks=weeks,
         title=title,
-        portfolio=portfolio,
-        page_label=page_label,
-        industry=industry,
-        role=role,
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
