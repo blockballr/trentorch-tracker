@@ -164,6 +164,10 @@ C:\Users\user\AppData\Local\Programs\Python\Python314\python.exe -m pytest tests
 - No GUI. CLI only.
 - Never writes into the TrenTorch clone.
 
+## Credits
+
+Built on top of the [TrenTorch](https://github.com/trentorch) curriculum and training framework. The tracker and timer are separate tools that read the clone without modifying it.
+
 ## License
 
 MIT. See `LICENSE`.
